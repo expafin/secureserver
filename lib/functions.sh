@@ -187,12 +187,29 @@ system_status() {
     print_color "blue" "SELinux Status:"
     echo "$(getenforce)"
     
-    # Firewall status
+    # Firewall status - with sudo check
     print_color "blue" "Firewall Status:"
     if command_exists firewall-cmd; then
-        echo "Active: $(firewall-cmd --state)"
-        echo "Zones: $(firewall-cmd --get-active-zones)"
-        echo "Open ports: $(firewall-cmd --list-ports)"
+        # Check if we have sudo/root privileges
+        if [ "$(id -u)" -eq 0 ]; then
+            # Running as root, use firewall-cmd directly
+            echo "Active: $(firewall-cmd --state 2>/dev/null || echo 'Permission denied')"
+            echo "Zones: $(firewall-cmd --get-active-zones 2>/dev/null || echo 'Permission denied')"
+            echo "Open ports: $(firewall-cmd --list-ports 2>/dev/null || echo 'Permission denied')"
+        else
+            # Not running as root, use sudo if available
+            if command_exists sudo && sudo -n true 2>/dev/null; then
+                # Sudo is available and doesn't require password
+                echo "Active: $(sudo firewall-cmd --state 2>/dev/null || echo 'Permission denied')"
+                echo "Zones: $(sudo firewall-cmd --get-active-zones 2>/dev/null || echo 'Permission denied')"
+                echo "Open ports: $(sudo firewall-cmd --list-ports 2>/dev/null || echo 'Permission denied')"
+            else
+                # No sudo privileges or sudo requires password
+                echo "Active: Cannot determine (requires root privileges)"
+                echo "Zones: Cannot determine (requires root privileges)"
+                echo "Open ports: Cannot determine (requires root privileges)"
+            fi
+        fi
     else
         echo "Firewalld not installed"
     fi
