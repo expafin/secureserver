@@ -1,0 +1,20 @@
+# Configuration files
+*.json
+
+# Generated documentation
+secureserver.md
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
