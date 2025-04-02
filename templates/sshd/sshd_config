@@ -1,0 +1,83 @@
+# SecureServer - Secure SSH Server Configuration
+# -------------------------------------------
+# This is a security-hardened SSH configuration template
+# The $SSH_PORT placeholder will be replaced with the actual SSH port
+# during installation
+
+# Basic settings
+Port $SSH_PORT
+Protocol 2
+AddressFamily inet
+ListenAddress 0.0.0.0
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Authentication
+PermitRootLogin no
+StrictModes yes
+MaxAuthTries 3
+MaxSessions 5
+PubkeyAuthentication yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+UsePAM yes
+
+# Authentication timeout settings
+LoginGraceTime 30s
+AuthenticationMethods publickey
+
+# Key exchange and cryptography
+# Only allow strong ciphers and algorithms
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+
+# Privilege separation
+UsePrivilegeSeparation sandbox
+
+# Forwarding and tunneling
+X11Forwarding no
+AllowAgentForwarding no
+AllowTcpForwarding no
+GatewayPorts no
+PermitTunnel no
+
+# Features
+TCPKeepAlive yes
+ClientAliveInterval 300
+ClientAliveCountMax 2
+Compression no
+
+# User environment
+PermitUserEnvironment no
+AcceptEnv LANG LC_*
+PrintMotd no
+PrintLastLog yes
+
+# Session settings
+Banner /etc/issue.net
+UseDNS no
+PermitTTY yes
+AllowUsers *@*
+
+# GSSAPI
+GSSAPIAuthentication no
+
+# Host keys configuration
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+# SubSystem SFTP
+Subsystem sftp internal-sftp
+
+# Match section for SFTP only users
+# Uncomment and modify this section to restrict users to SFTP only
+#Match Group sftponly
+#    ChrootDirectory /sftp/%u
+#    ForceCommand internal-sftp
+#    AllowTcpForwarding no
+#    X11Forwarding no

@@ -1,0 +1,80 @@
+# SecureServer - Fail2ban Configuration
+# --------------------------------------
+# Enhanced fail2ban configuration with sensible defaults
+# The $SSH_PORT placeholder will be replaced with the actual SSH port
+
+[DEFAULT]
+# Ban hosts for one hour by default
+bantime = 3600
+
+# A host is banned if it has generated "maxretry" during the last "findtime" seconds
+findtime = 600
+maxretry = 3
+
+# Ignore localhost and your local network (adjust if needed)
+ignoreip = 127.0.0.1/8 ::1
+
+# Destination email for notifications (uncomment and set if desired)
+# destemail = your@email.com
+# sendername = Fail2Ban Alert
+# mta = sendmail
+
+# Ban actions
+banaction = iptables-multiport
+banaction_allports = iptables-allports
+
+# Default action
+action = %(action_)s
+
+# Use aggressive mode to improve security
+# The aggressive mode uses both iptables and ip6tables
+aggressive = true
+
+# Log level: INFO / NOTICE / WARNING / ERROR / CRITICAL
+loglevel = INFO
+
+# Log file
+logtarget = /var/log/fail2ban.log
+
+# Socket file
+socket = /var/run/fail2ban/fail2ban.sock
+
+[sshd]
+enabled = true
+port = $SSH_PORT
+filter = sshd
+logpath = /var/log/secure
+maxretry = 3
+bantime = 3600
+
+[sshd-ddos]
+enabled = true
+port = $SSH_PORT
+filter = sshd-ddos
+logpath = /var/log/secure
+maxretry = 3
+bantime = 7200
+
+# HTTP Auth
+[apache-auth]
+enabled = false
+filter = apache-auth
+logpath = /var/log/httpd/*error_log
+maxretry = 5
+bantime = 3600
+
+# HTTP Auth for Nginx
+[nginx-http-auth]
+enabled = false
+filter = nginx-http-auth
+logpath = /var/log/nginx/error.log
+maxretry = 5
+bantime = 3600
+
+# Postfix SMTP Auth
+[postfix-sasl]
+enabled = false
+filter = postfix-sasl
+logpath = /var/log/mail.log
+maxretry = 3
+bantime = 3600
